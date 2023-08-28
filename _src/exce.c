@@ -187,7 +187,6 @@ bool exceBuildIn(command_list* list)
     else
     {
       chdir(arg[1]);
-      perror("cd");
     }
 
     char* tmp = getcwd(NULL,0);

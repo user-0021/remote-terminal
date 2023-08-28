@@ -70,7 +70,7 @@ int main(int argc,char** argv)
 
   //read buff
   char readStr[4096];
-
+  ssize_t size;
   //loop work
   while (1)
   {
@@ -81,14 +81,15 @@ int main(int argc,char** argv)
     client_list * itr = head.next;
     while (itr != NULL)
     {
-      if(read(itr->stdOut[0],readStr,sizeof(readStr)) > 0)
+      if((size = read(itr->stdOut[0],readStr,sizeof(readStr))) > 0)
       {
-        UdpServer_Send(server,itr->client,readStr,strlen(readStr)+1);
+        UdpServer_Send(server,itr->client,readStr,size);
       }
 
-      if(read(itr->stdErr[0],readStr,sizeof(readStr)) > 0)
+
+      if((size = read(itr->stdErr[0],readStr,sizeof(readStr))) > 0)
       {
-        UdpServer_Send(server,itr->client,readStr,strlen(readStr)+1);
+        UdpServer_Send(server,itr->client,readStr,size);
       }
       
       itr = itr->next;
@@ -370,23 +371,19 @@ void terminalProcess()
   char* lineStr = (char*)malloc(4096);
   ssize_t buffSize;
 
-  int i = 0;
   while (1)
   {
-    i++;
     PrintLineHead();
 
-    if(exceCommandIsDone())
+    command_block block;
+    getline(&lineStr, &buffSize, stdin);
+    
+    if(CommandLineTokenize(lineStr,&block) == 0)
     {
-
-      command_block block;
-      getline(&lineStr, &buffSize, stdin);
-      if(CommandLineTokenize(lineStr,&block) == 0)
-      {
-        exceCommandBlock(&block);
-        CommandListFree(&block);
-      }
+      exceCommandBlock(&block);
+      CommandListFree(&block);
     }
-
+    
+    exceCommandWait();
   } 
 }
