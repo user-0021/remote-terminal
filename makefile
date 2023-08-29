@@ -5,7 +5,7 @@ CC     = gcc
 CFLAGS =
 
 #実行ファイル名
-TARGET = out
+TARGET = remoteTerminal
 
 #コンパイルするファイル
 SRCDIRS  = ./_src
