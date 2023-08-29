@@ -196,11 +196,10 @@ bool exceBuildIn(command_list* list)
     free(arg);
     return true;
   }
-  else if(strcmp(arg[0],"exit") == 0)
-  {
-    exit(EXIT_SUCCESS);
-    return true;
-  }
+  // else if(strcmp(arg[0],"exit") == 0)
+  // {
+  //   exit(EXIT_SUCCESS);
+  // }
 
   free(arg);
 

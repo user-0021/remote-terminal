@@ -25,7 +25,6 @@ client_list head = {};
 UDP_SERVER_HANDLE server;
 
 
-void signal_handler(int signum);
 void signal_handler_2(int signum);
 void Callback(UDP_SERVER_HANDLE this,void* buff,size_t size,struct sockaddr_in from,void* userData);
 
@@ -77,6 +76,7 @@ int main(int argc,char** argv)
     //check udp port
     UdpServer_Loop(server);
 
+
     //check process output
     client_list * itr = head.next;
     while (itr != NULL)
@@ -91,7 +91,7 @@ int main(int argc,char** argv)
       {
         UdpServer_Send(server,itr->client,readStr,size);
       }
-      
+
       itr = itr->next;
     }
     
@@ -120,17 +120,8 @@ void signal_handler_2(int signum)
   }
 
   sleep(1);
-  exit(EXIT_SUCCESS);
+  _exit(EXIT_SUCCESS);
 }
-
-void signal_handler(int signum) 
-{
-  exceCommandSendSigint();
-  putchar('\n');
-  PrintLineHead();
-  fflush(stdout);
-}
-
 
 void PrintLineHead()
 {
@@ -186,6 +177,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
+          UdpServer_Send(server,itr->client,"D",1);//あえての1
           return;
         }
 
@@ -210,6 +202,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
+          UdpServer_Send(server,itr->client,"D",1);//あえての1
           return;
         }
 
@@ -235,6 +228,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
+          UdpServer_Send(server,itr->client,"D",1);//あえての1
           return;
         }
 
@@ -250,6 +244,9 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
       close(itr->stdErr[0]);
       close(itr->stdOut[0]);
       close(itr->stdIn[1]);
+      UdpServer_Send(server,itr->client,"Terminal closed\n",17);
+      UdpServer_Send(server,itr->client,"D",1);//あえての1
+
       befor->next = itr->next;
       free(itr);
 
@@ -312,7 +309,6 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
       }
       else if (data->pid == 0)
       {//child       
-
         //パイプをつなぐ
         if (data->stdOut[1] != STDOUT_FILENO) 
         {
@@ -336,7 +332,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         close(data->stdIn[1]);
 
         terminalProcess();
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
       }
       else
       {
@@ -362,6 +358,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
   }
 }
 
+void signal_handler(int signum);
 
 void terminalProcess()
 {
@@ -387,3 +384,15 @@ void terminalProcess()
     exceCommandWait();
   } 
 }
+
+void signal_handler(int signum) 
+{
+  exceCommandSendSigint();
+  if(exceCommandIsDone())
+  {
+    putchar('\n');
+    PrintLineHead();
+    fflush(stdout);
+  }
+}
+
