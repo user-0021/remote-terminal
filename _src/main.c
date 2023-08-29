@@ -177,7 +177,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
-          UdpServer_Send(server,itr->client,"D",1);//あえての1
+          UdpServer_Send(server,from,"D",1);//あえての1
           return;
         }
 
@@ -202,7 +202,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
-          UdpServer_Send(server,itr->client,"D",1);//あえての1
+          UdpServer_Send(server,from,"D",1);//あえての1
           return;
         }
 
@@ -228,7 +228,7 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
         {
           char forkErr[] = "Failed find your terminal\n";
           UdpServer_Send(this,from,forkErr,sizeof(forkErr));
-          UdpServer_Send(server,itr->client,"D",1);//あえての1
+          UdpServer_Send(server,from,"D",1);//あえての1
           return;
         }
 
