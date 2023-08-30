@@ -90,6 +90,8 @@ void exceCommandSendSigint()
 
 void exceCommandList(command_list* list)
 {
+  // int pipe = STDIN_FILENO;
+
   pid = fork();
 
   if(pid == -1)
@@ -100,6 +102,8 @@ void exceCommandList(command_list* list)
   
   if(pid == 0)
   {
+    // dup2(pipe,STDIN_FILENO);
+
     if(list->next != NULL)
     {
       exceCommandPipe(list->next);
@@ -196,10 +200,10 @@ bool exceBuildIn(command_list* list)
     free(arg);
     return true;
   }
-  // else if(strcmp(arg[0],"exit") == 0)
-  // {
-  //   exit(EXIT_SUCCESS);
-  // }
+  else if(strcmp(arg[0],"exit") == 0)
+  {
+    exit(EXIT_SUCCESS);
+  }
 
   free(arg);
 

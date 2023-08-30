@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <wait.h>
 #include <unistd.h>
 #include <signal.h>
 
@@ -79,8 +80,25 @@ int main(int argc,char** argv)
 
     //check process output
     client_list * itr = head.next;
+    client_list * befor = &head;
     while (itr != NULL)
     {
+      int status;
+      if(waitpid(itr->pid, &status, WNOHANG))
+      {//プロセスが死んだらクローズイベント
+        close(itr->stdErr[0]);
+        close(itr->stdOut[0]);
+        close(itr->stdIn[1]);
+        UdpServer_Send(server,itr->client,"Terminal closed\n",17);
+        UdpServer_Send(server,itr->client,"D",1);//あえての1
+
+        befor->next = itr->next;
+        free(itr);
+        itr = befor->next;
+
+        continue;
+      }
+
       if((size = read(itr->stdOut[0],readStr,sizeof(readStr))) > 0)
       {
         UdpServer_Send(server,itr->client,readStr,size);
@@ -92,6 +110,7 @@ int main(int argc,char** argv)
         UdpServer_Send(server,itr->client,readStr,size);
       }
 
+      befor = itr;
       itr = itr->next;
     }
     
@@ -241,14 +260,6 @@ void Callback(UDP_CLIENT_HANDLE this,void* buff,size_t size,struct sockaddr_in f
       }
 
       write(itr->stdIn[1],"exit\n",6);
-      close(itr->stdErr[0]);
-      close(itr->stdOut[0]);
-      close(itr->stdIn[1]);
-      UdpServer_Send(server,itr->client,"Terminal closed\n",17);
-      UdpServer_Send(server,itr->client,"D",1);//あえての1
-
-      befor->next = itr->next;
-      free(itr);
 
       break;
     }
@@ -380,7 +391,7 @@ void terminalProcess()
       exceCommandBlock(&block);
       CommandListFree(&block);
     }
-    
+
     exceCommandWait();
   } 
 }
